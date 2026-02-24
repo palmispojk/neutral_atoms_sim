@@ -57,11 +57,17 @@ if __name__ == '__main__':
     results = []
     
     # concurrent.futures automatically handles chunking and load balancing across all CPU cores!
-    # We no longer need the manual `chunksize = 4` loop or `pathos`.
     with concurrent.futures.ProcessPoolExecutor() as executor:
         # We simply pass the array of seeds to the executor
-        for res in executor.map(simulate_single_atom, seeds):
-            results.append(res)
+        futures = {executor.submit(simulate_single_atom, seed): seed for seed in seeds}
+        completed_count = 0
+        for future in concurrent.futures.as_completed(futures):
+            
+            results.append(future.result())
+            completed_count += 1
+            
+            
+            print(f"Progress: {completed_count} / {Natoms} atoms completed.", flush=True)
             
     print("Simulation complete! Saving data...")
     
