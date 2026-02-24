@@ -1,5 +1,5 @@
 import pylcp
-import .constants as constants
+import constants as constants
 import numpy as np
 import concurrent.futures
 import pickle
@@ -39,11 +39,18 @@ def simulate_single_atom(seed):
         't_eval': np.linspace(0, tmax, 5001),
         'random_recoil': True,
         'progress_bar': False,
-        'max_scatter_probability': 0.5
+        'max_scatter_probability': 0.5,
+        'events': []
     }
     
-    sol = obe.evolve_motion([0, tmax], r0, v0, **kwargs)
+    obe.set_initial_position(r0)
+    obe.set_initial_velocity(v0)
     
+    # Then evolve the motion! (Only pass the time span and kwargs)
+    obe.evolve_motion([0, tmax], **kwargs)
+    
+    # Return the solution
+    sol = obe.sol
     return sol.t, sol.r, sol.v
 
 if __name__ == '__main__':
